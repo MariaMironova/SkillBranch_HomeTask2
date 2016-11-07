@@ -1,12 +1,14 @@
 import express from 'express';
 import cors from 'cors';
-import fio from './fio';
+import sum from './sum';
 
 const app = express();
 app.use(cors());
 app.get('/', (req, res) => {
-  const fullname = req.query.fullname;
-  res.send(fio(fullname));
+  const a = req.query.a;
+  const b = req.query.b;
+  const summa = '' + sum(a, b);
+  res.send(summa);
 });
 
 app.listen(3000, () => {
