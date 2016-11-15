@@ -24,62 +24,37 @@ function getResult(json, key) {
   }
 }
 
-app.get('/', (req, res) => {
-  res.json(pc);
-});
 
-app.get('/:key', (req, res) => {
-  const key = req.params.key;
+function getVolumes() {
+  const hdd = pc.hdd;
+  const volumesMap = {};
+  hdd.forEach((vendor) => {
+      const vol = vendor.volume;
+      if (volumesMap.hasOwnProperty(vol)) volumesMap[vol] += +vendor.size;
+      else volumesMap[vol] = +vendor.size;
+   });
 
-  if (key == 'volumes') {
-    const hdd = pc.hdd;
-    const mapOfVol = new Array();
-    const volumesMap = {};
-    console.log(hdd);
-    hdd.forEach((vendor) => {
-        const vol = vendor.volume;
-        if (volumesMap.hasOwnProperty(vol)) volumesMap[vol] += +vendor.size;
-        else volumesMap[vol] = +vendor.size;
-     });
+   for (var vol in volumesMap)
+      if (volumesMap.hasOwnProperty(vol)) volumesMap[vol] += 'B';
+   return volumesMap;
+}
 
-     for (var vol in volumesMap)
-        if (volumesMap.hasOwnProperty(vol)) volumesMap[vol] += 'B';
-     return res.json(volumesMap);
+app.get('/:key?/:value?/:addValue?', (req, res) => {
+  const params = {};
+  console.log(req.params.length);
+  for (var par in req.params) {
+    console.log(par);
+    params[par] = req.params[par];
   }
 
-
-  const result = getResult(pc, key);
-  if (result !== false) {
-    console.log(result);
-    return res.json(result);
-  } else {
-    return res.status(404).send('Not Found');
+  let result = pc;
+  for (var par in params) {
+    if (params[par] == 'length' && par != 'key') return res.status(404).send('Not Found');
+    if (params[par] == undefined) return result === false ? res.status(404).send('Not Found') : res.json(result);
+    if (params[par] == 'volumes') return res.json(getVolumes());
+    result = getResult(result, params[par]);
   }
-});
-
-app.get('/:key/:value', (req, res) => {
-  const key = req.params.key;
-  const value = req.params.value;
-  const result = getResult(getResult(pc, key), value);
-
-  if (result && value != 'length') {
-    return res.json(result);
-  } else {
-    return res.status(404).send('Not Found');
-  }
-});
-
-app.get('/:key/:value/:addValue', (req, res) => {
-  const key = req.params.key;
-  const value = req.params.value;
-  const addValue = req.params.addValue;
-  const result = getResult(getResult(getResult(pc, key), value), addValue);
-
-  if (result && addValue != 'length') {
-    return res.json(result);
-  } else {
-    return res.status(404).send('Not Found');
-  }
+  return result === false ? res.status(404).send('Not Found') : res.json(result);
 });
 
 app.listen(3000, () => {
