@@ -39,17 +39,15 @@ function getVolumes() {
    return volumesMap;
 }
 
-app.get('/:key?/:value?/:addValue?', (req, res) => {
+app.get('/:key1?/:key2?/:key3?', (req, res) => {
   const params = {};
-  console.log(req.params.length);
   for (var par in req.params) {
-    console.log(par);
     params[par] = req.params[par];
   }
 
   let result = pc;
   for (var par in params) {
-    if (params[par] == 'length' && par != 'key') return res.status(404).send('Not Found');
+    if (params[par] == 'length' && par != 'key1') return res.status(404).send('Not Found');
     if (params[par] == undefined) return result === false ? res.status(404).send('Not Found') : res.json(result);
     if (params[par] == 'volumes') return res.json(getVolumes());
     result = getResult(result, params[par]);
