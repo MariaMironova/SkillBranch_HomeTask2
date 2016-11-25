@@ -1,52 +1,47 @@
 import express from 'express';
 import cors from 'cors';
 import fetch from 'isomorphic-fetch';
-import hsl from 'hsl-to-hex';
 
 const app = express();
 app.use(cors());
 
-function hsl2hex(hslColor) {
-  hslColor = hslColor.match(/^hsl\(\s*(\d+)\s*,\s*%20(\d+)%\s*,\s*%20(\d+)%\s*\)$/);
-  if ( (!hslColor) || (hslColor[2] < 0) || (hslColor[2] > 100) || (hslColor[3] < 0) || (hslColor[3] > 100)) return 'Invalid color';
-  return hsl(hslColor[1], hslColor[2], hslColor[3]);
-}
+//const b = 3/(Math.pow(3/2,1/2)-1);
+const rubicPos = [            1,
+                             18,
+                            243,
+                           3240,
+                          43254,
+                         577368,
+                        7706988,
+                      102876480,
+                     1373243544,
+                    18330699168,
+                   244686773808,
+                  3266193870720,
+                 43598688377184,
+                581975750199168,
+               7768485393179328,
+             103697388221736960,
+            1384201395738071424,
+           18476969736848122368,
+          246639261965462754048,
+         3292256598848819251200,
+        43946585901564160587264];
 
-function rgb2hex(rgb){
- rgb = rgb.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/);
- if (!rgb) return 'Invalid color';
- let result = '#';
- for (var i = 1; i <= 3; i++) {
-  var num = parseInt(rgb[i],10);
-  if (num > 255 || num < 0) return 'Invalid color';
-  result += ("0" + num.toString(16)).slice(-2);
- }
- return result;
-}
-
-function hex2hex(color) {
-  color = ((color.charAt(0) != '#') ? '#' : '') + color.toLowerCase();
-  var isOk  = /(^#[0-9a-f]{6}$)|(^#[0-9a-f]{3}$)/i.test(color);
-  if (color.length == 4 && isOk) {
-    var newColor = color.substring(0,1) + color.charAt(1) + color.substring(1,3) + color.charAt(2) + color.charAt(3) + color.charAt(3);
-    color = newColor;
-  }
-  return isOk ? color : 'Invalid color';
-}
-
-function getColor(color) {
-  if (color.startsWith('rgb'))  return rgb2hex(color);
-  if (color.startsWith('hsl')) return hsl2hex(color);
-  return hex2hex(color);
+function blackbox(num) {
+  num = parseInt(num, 10);
+  if( num < 0 || num > 18) return 'Invalid';
+  return rubicPos[num];
+  //return Math.round((3+b)/(6*2)*Math.pow(b, num));
 }
 
 app.get('/', (req, res) => {
-  const color = req.query.color;
-  console.log(color);
-  if (color === undefined) {
-    res.send('Invalid color');
+  const num = req.query.i;
+  console.log(num);
+  if (num === undefined) {
+    res.send('Invalid');
   }
-  res.send(getColor(color.trim()));
+  res.send('' + blackbox(num.trim()));
 });
 
 app.listen(3000, () => {
